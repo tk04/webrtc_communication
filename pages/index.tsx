@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 interface indexProps {}
 
 const Index: React.FC<indexProps> = ({}) => {
+  const [videoHeight, setVideoHeight] = useState();
   useEffect(() => {
     const videoSelector = document.querySelector("#camera");
     videoSelector?.addEventListener("change", startVideo);
@@ -28,11 +29,13 @@ const Index: React.FC<indexProps> = ({}) => {
     const videoSource = (document.querySelector("#camera") as HTMLSelectElement)
       .value;
     const constraints = {
+      ////
       audio: false,
       video: {
-        width: { min: 1280, ideal: 1920, max: 2560 },
-        height: { min: 720, ideal: 1080, max: 1440 },
+        width: { min: 240, ideal: 240, max: 240 },
+        height: { min: 240, ideal: 240, max: 240 },
         // optional: [{ sourceId: videoSource }],
+        deviceId: videoSource,
       },
     };
     const videoArea = document.querySelector("video");
@@ -47,6 +50,9 @@ const Index: React.FC<indexProps> = ({}) => {
       .catch((err) => {
         console.log("Error: ", err.message);
       });
+    videoArea?.addEventListener("can", () => {
+      console.log("PLAYING ");
+    });
   };
   const stopVideo = () => {
     // const track = stream1.getVideoTracks()[0];
@@ -64,6 +70,25 @@ const Index: React.FC<indexProps> = ({}) => {
 
     stream1.getTracks().forEach((track: any) => track.stop());
   };
+  const takePhoto = () => {
+    let width = 240;
+    let height = 240;
+
+    // const takeProfilePic = document.querySelector("#takeProfilePic");
+    const profilePicCanvas = document.querySelector("canvas");
+    const profilePicOutput = document.querySelector("#picOutput");
+    const context = profilePicCanvas?.getContext("2d");
+    const videoArea = document.querySelector("video");
+
+    console.log("width: ", width, "height: ", height);
+    if (width && height) {
+      profilePicCanvas!.width = width;
+      profilePicCanvas!.height = height;
+      context!.drawImage(videoArea!, 0, 0, width, height);
+      const dataUrl = profilePicCanvas!.toDataURL("image/png");
+      profilePicOutput!.setAttribute("src", dataUrl);
+    }
+  };
   return (
     <div>
       Hello
@@ -72,7 +97,19 @@ const Index: React.FC<indexProps> = ({}) => {
       <div>
         Video: <select id="camera"></select>
       </div>
-      <video autoPlay width="100" height="100"></video>
+      <button id="takeProfilePic" onClick={takePhoto}>
+        Create Profile Picture
+      </button>
+      <canvas
+        id="canvas"
+        width="640"
+        height="480"
+        style={{ display: "none" }}
+      ></canvas>
+      <div>
+        <img id="picOutput" />
+      </div>
+      <video autoPlay></video>
     </div>
   );
 };
